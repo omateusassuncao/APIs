@@ -4,6 +4,8 @@ namespace ProfessoresApi.Models;
 
 public class Professor
 {
+    [Key]
+    [Required]
     public int Id { get; set; }
 
     [Required(ErrorMessage = "O nome do Professor é obrigatório")]

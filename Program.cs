@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using ProfessoresApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("ProfessorConnection");
+
+builder.Services.AddDbContext<ProfessorContext>(opts =>
+    opts.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))); 
 
 // Add services to the container.
 
