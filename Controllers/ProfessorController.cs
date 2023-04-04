@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using ProfessoresApi.Data;
 using ProfessoresApi.Data.Dtos;
@@ -35,12 +36,12 @@ public class ProfessorController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<Professor> RecuperaProfessor(
+    public IEnumerable<ReadProfessorDto> RecuperaProfessor(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 10)
     {
         //return professores.Skip(skip).Take(take);
-        return _context.Professores.Skip(skip).Take(take);
+        return _mapper.Map<List<ReadProfessorDto>>(_context.Professores.Skip(skip).Take(take));
     }
 
     [HttpGet("{id}")]
@@ -50,11 +51,12 @@ public class ProfessorController : ControllerBase
 
         var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
         if (professor == null) return NotFound();
+        var professorDto = _mapper.Map<ReadProfessorDto>(professor); 
         return Ok(professor);
     }
 
     [HttpPut("{id}")]
-    public IActionResult AtualizaFilme(int id, [FromBody] UpdateProfessorDto professorDto)
+    public IActionResult AtualizaProfessor(int id, [FromBody] UpdateProfessorDto professorDto)
     {
         var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
         if(professor == null) return NotFound();
@@ -63,6 +65,39 @@ public class ProfessorController : ControllerBase
         _context.SaveChanges();
 
         return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult AtualizaProfessorPatch(int id,JsonPatchDocument<UpdateProfessorDto> patch)
+    {
+        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
+        if (professor == null) return NotFound();
+
+        var professorParaAtualizar = _mapper.Map<UpdateProfessorDto>(professor);
+
+        patch.ApplyTo(professorParaAtualizar, ModelState);
+
+        if(!TryValidateModel(professorParaAtualizar))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        _mapper.Map(professorParaAtualizar, professor);
+        _context.SaveChanges();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeletaProfessor(int id)
+    {
+        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
+        if (professor == null) return NotFound();
+
+        _context.Remove(professor);
+        _context.SaveChanges();
+        return NoContent();
+
     }
 
 }
