@@ -8,6 +8,8 @@ var connectionString = builder.Configuration.GetConnectionString("ProfessorConne
 builder.Services.AddDbContext<ProfessorContext>(opts =>
     opts.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))); 
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // Add services to the container.
 
 builder.Services.AddControllers();

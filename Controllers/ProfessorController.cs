@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using ProfessoresApi.Data;
+using ProfessoresApi.Data.Dtos;
 using ProfessoresApi.Models;
 
 namespace ProfessoresApi.Controllers;
@@ -12,18 +14,21 @@ public class ProfessorController : ControllerBase
     //private static int Id = 0;
 
     private ProfessorContext _context;
+    private IMapper _mapper;
 
-    public ProfessorController(ProfessorContext context)
+    public ProfessorController(ProfessorContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     [HttpPost]
-    public IActionResult AdicionaProfessor([FromBody] Professor professor)
+    public IActionResult AdicionaProfessor([FromBody] CreateProfessorDto professorDto)
     {
         //professor.Id = Id++;
         //professores.Add(professor);
 
+        Professor professor = _mapper.Map<Professor>(professorDto);
         _context.Professores.Add(professor);
         _context.SaveChanges(); 
         return CreatedAtAction(nameof(RecuperaProfessorPorId),new {id = professor.Id }, professor);
