@@ -2,7 +2,7 @@
 
 namespace ProfessoresApi.Data.Dtos;
 
-public class UpdateProfessorDto
+public class CreateProfessorDto
 {
 
     [Required(ErrorMessage = "O nome do Professor é obrigatório")]

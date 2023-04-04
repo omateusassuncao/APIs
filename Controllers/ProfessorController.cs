@@ -53,4 +53,16 @@ public class ProfessorController : ControllerBase
         return Ok(professor);
     }
 
+    [HttpPut("{id}")]
+    public IActionResult AtualizaFilme(int id, [FromBody] UpdateProfessorDto professorDto)
+    {
+        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
+        if(professor == null) return NotFound();
+
+        _mapper.Map(professorDto, professor);
+        _context.SaveChanges();
+
+        return NoContent();
+    }
+
 }
