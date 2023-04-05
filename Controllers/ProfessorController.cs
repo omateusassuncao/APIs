@@ -23,7 +23,14 @@ public class ProfessorController : ControllerBase
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Adicionar Professor ao bando de dados
+    /// </summary>
+    /// <param name="professorDto">Objeto com os parâmetros necessários para a criação de um professor</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='201'> Caso inserção com sucesso</response>response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public IActionResult AdicionaProfessor([FromBody] CreateProfessorDto professorDto)
     {
         //professor.Id = Id++;
@@ -35,6 +42,12 @@ public class ProfessorController : ControllerBase
         return CreatedAtAction(nameof(RecuperaProfessorPorId),new {id = professor.Id }, professor);
     }
 
+    /// <summary>
+    /// Recupera lista de objetos Professor do bando de dados
+    /// </summary>
+    /// <param name="">Nenhum parâmetro é necessário</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='200'> Caso recuperação com sucesso</response>response>
     [HttpGet]
     public IEnumerable<ReadProfessorDto> RecuperaProfessor(
         [FromQuery] int skip = 0,
@@ -44,6 +57,12 @@ public class ProfessorController : ControllerBase
         return _mapper.Map<List<ReadProfessorDto>>(_context.Professores.Skip(skip).Take(take));
     }
 
+    /// <summary>
+    /// Recupera objeto Professor de id específico do bando de dados
+    /// </summary>
+    /// <param name="id">Id do objeto Professor</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='200'> Caso recuperação com sucesso</response>response>
     [HttpGet("{id}")]
     public IActionResult RecuperaProfessorPorId(int id)
     {
@@ -55,6 +74,12 @@ public class ProfessorController : ControllerBase
         return Ok(professor);
     }
 
+    /// <summary>
+    /// Atualiza um objeto Professor de id específico do bando de dados
+    /// </summary>
+    /// <param name="id">Id do objeto Professor e Objeto com os parâmetros necessários para a atualização de um professor</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='204'> Caso atualizar com sucesso</response>response>
     [HttpPut("{id}")]
     public IActionResult AtualizaProfessor(int id, [FromBody] UpdateProfessorDto professorDto)
     {
@@ -67,6 +92,12 @@ public class ProfessorController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Atualiza um atributo específico de um objeto Professor de id específico do bando de dados
+    /// </summary>
+    /// <param name="id">Id do objeto Professor e Objeto JSON com os parâmetros necessários para o update de um atributo específica do objeto professor</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='204'> Caso atualização com sucesso</response>response>
     [HttpPatch("{id}")]
     public IActionResult AtualizaProfessorPatch(int id,JsonPatchDocument<UpdateProfessorDto> patch)
     {
@@ -88,6 +119,12 @@ public class ProfessorController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deleta um objeto Professor de id específico do bando de dados
+    /// </summary>
+    /// <param name="id">Id do objeto Professor</param>
+    /// <returns>IActionResullt</returns>
+    /// <response code='204'> Caso deleção com sucesso</response>response>
     [HttpDelete("{id}")]
     public IActionResult DeletaProfessor(int id)
     {
