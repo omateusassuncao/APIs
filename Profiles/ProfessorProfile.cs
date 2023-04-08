@@ -11,6 +11,7 @@ public class ProfessorProfile : Profile
         CreateMap<CreateProfessorDto, Professor>();
         CreateMap<UpdateProfessorDto, Professor>();
         CreateMap<Professor, UpdateProfessorDto>();
+        CreateMap<ReadProfessorDto, UpdateProfessorDto>();
         CreateMap<Professor, ReadProfessorDto>();
     }
 }

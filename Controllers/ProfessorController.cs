@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using ProfessoresApi.Data;
 using ProfessoresApi.Data.Dtos;
 using ProfessoresApi.Models;
+using ProfessoresApi.Services;
 
 namespace ProfessoresApi.Controllers;
 
@@ -11,16 +13,12 @@ namespace ProfessoresApi.Controllers;
 [Route("[controller]")]
 public class ProfessorController : ControllerBase
 {
-    //private static List<Professor> professores = new List<Professor>();
-    //private static int Id = 0;
 
-    private ProfessorContext _context;
-    private IMapper _mapper;
+    private ProfessorService _professorService;
 
-    public ProfessorController(ProfessorContext context, IMapper mapper)
+    public ProfessorController(ProfessorService professorService)
     {
-        _context = context;
-        _mapper = mapper;
+        _professorService = professorService;
     }
 
     /// <summary>
@@ -33,13 +31,9 @@ public class ProfessorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public IActionResult AdicionaProfessor([FromBody] CreateProfessorDto professorDto)
     {
-        //professor.Id = Id++;
-        //professores.Add(professor);
+        ReadProfessorDto readDto =  _professorService.AdicionaProfessor(professorDto);
+        return CreatedAtAction(nameof(RecuperaProfessorPorId), new { id = readDto.Id }, readDto);
 
-        Professor professor = _mapper.Map<Professor>(professorDto);
-        _context.Professores.Add(professor);
-        _context.SaveChanges(); 
-        return CreatedAtAction(nameof(RecuperaProfessorPorId),new {id = professor.Id }, professor);
     }
 
     /// <summary>
@@ -49,12 +43,11 @@ public class ProfessorController : ControllerBase
     /// <returns>IActionResullt</returns>
     /// <response code='200'> Caso recuperação com sucesso</response>response>
     [HttpGet]
-    public IEnumerable<ReadProfessorDto> RecuperaProfessor(
-        [FromQuery] int skip = 0,
-        [FromQuery] int take = 10)
+    public IActionResult RecuperaProfessor([FromQuery] int skip = 0,[FromQuery] int take = 10)
     {
-        //return professores.Skip(skip).Take(take);
-        return _mapper.Map<List<ReadProfessorDto>>(_context.Professores.Skip(skip).Take(take));
+        IEnumerable<ReadProfessorDto> readDto = _professorService.RecuperaProfessor(skip, take);
+        if (readDto != null) return Ok(readDto);
+        return NotFound();
     }
 
     /// <summary>
@@ -67,11 +60,9 @@ public class ProfessorController : ControllerBase
     public IActionResult RecuperaProfessorPorId(int id)
     {
         //var professor = professores.FirstOrDefault(professor => professor.Id == id);
-
-        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
-        if (professor == null) return NotFound();
-        var professorDto = _mapper.Map<ReadProfessorDto>(professor); 
-        return Ok(professor);
+        ReadProfessorDto readDto = _professorService.RecuperaReadProfessorId(id);
+        if (readDto != null) return Ok(readDto);
+        return NotFound();
     }
 
     /// <summary>
@@ -83,13 +74,10 @@ public class ProfessorController : ControllerBase
     [HttpPut("{id}")]
     public IActionResult AtualizaProfessor(int id, [FromBody] UpdateProfessorDto professorDto)
     {
-        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
-        if(professor == null) return NotFound();
-
-        _mapper.Map(professorDto, professor);
-        _context.SaveChanges();
-
+        Result resultado = _professorService.AtualizaProfessor(id, professorDto);
+        if (resultado.IsFailed) return NotFound();
         return NoContent();
+
     }
 
     /// <summary>
@@ -101,22 +89,26 @@ public class ProfessorController : ControllerBase
     [HttpPatch("{id}")]
     public IActionResult AtualizaProfessorPatch(int id,JsonPatchDocument<UpdateProfessorDto> patch)
     {
-        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
-        if (professor == null) return NotFound();
+        UpdateProfessorDto updateDto = ValidateModelProfessor(id, patch);
+        if (updateDto == null) return ValidationProblem(ModelState);
 
-        var professorParaAtualizar = _mapper.Map<UpdateProfessorDto>(professor);
-
-        patch.ApplyTo(professorParaAtualizar, ModelState);
-
-        if(!TryValidateModel(professorParaAtualizar))
-        {
-            return ValidationProblem(ModelState);
-        }
-
-        _mapper.Map(professorParaAtualizar, professor);
-        _context.SaveChanges();
-
+        Result resultadoAtualiza = _professorService.AtualizaProfessor(id, updateDto);
+        if (resultadoAtualiza == null) return NotFound();
         return NoContent();
+    }
+
+    public UpdateProfessorDto ValidateModelProfessor(int id, JsonPatchDocument<UpdateProfessorDto> patch)
+    {
+        UpdateProfessorDto updateDto = _professorService.RecuperaUpdateProfessorId(id);
+        if (updateDto == null) return null;
+
+        patch.ApplyTo(updateDto, ModelState);
+
+        if (!TryValidateModel(updateDto))
+        {
+            return null;
+        }
+        return updateDto;
     }
 
     /// <summary>
@@ -128,13 +120,10 @@ public class ProfessorController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult DeletaProfessor(int id)
     {
-        var professor = _context.Professores.FirstOrDefault(p => p.Id == id);
-        if (professor == null) return NotFound();
-
-        _context.Remove(professor);
-        _context.SaveChanges();
+        Result resultado = _professorService.DeletaProfessor(id);
+        if (resultado.IsFailed) return NotFound();
         return NoContent();
-
     }
 
 }
+ 
