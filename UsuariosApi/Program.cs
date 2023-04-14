@@ -16,7 +16,12 @@ var connectionString = builder.Configuration.GetConnectionString("UsuarioConnect
 builder.Services.AddDbContext<UserDbContext>(opts => 
     opts.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>().AddEntityFrameworkStores<UserDbContext>();
+builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>
+    (
+    opt => opt.SignIn.RequireConfirmedEmail = true
+    )
+    .AddEntityFrameworkStores<UserDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<CadastroService, CadastroService>();
 builder.Services.AddScoped<LoginService, LoginService>();

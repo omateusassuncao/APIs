@@ -21,6 +21,6 @@ public class CadastroController : ControllerBase
     {
         Result resultado = _cadastroService.CadastroUsuario(createDto);
         if (resultado.IsFailed) return StatusCode(500);
-        return Ok();
+        return Ok(resultado.Successes.FirstOrDefault());
     }
 }
