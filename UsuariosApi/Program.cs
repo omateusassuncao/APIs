@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using UsuariosApi.Data;
 using UsuariosApi.Services;
 
+// NEecssário ainda verificar sobre a passagem de informações confidenciais via appsettings
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -49,3 +51,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
